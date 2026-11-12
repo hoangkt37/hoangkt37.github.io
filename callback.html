@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tesla OAuth callback — Khoa Range Check</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #111; }
+    #code { font-family: ui-monospace, monospace; word-break: break-all; background: #f4f4f4; padding: 0.75rem; border-radius: 6px; min-height: 3rem; }
+    button { margin-top: 0.75rem; padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
+    .err { color: #b00020; }
+    .ok { color: #0a7a2f; }
+  </style>
+</head>
+<body>
+  <h1>Authorization callback</h1>
+  <p id="status">Looking for <code>?code=</code> in the URL…</p>
+  <div id="code" hidden></div>
+  <button id="copy" type="button" hidden>Copy code</button>
+  <p id="hint" hidden>Paste this code into the token exchange promptly — Tesla auth codes expire quickly (minutes).</p>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get("code");
+      var err = params.get("error");
+      var desc = params.get("error_description");
+      var status = document.getElementById("status");
+      var box = document.getElementById("code");
+      var btn = document.getElementById("copy");
+      var hint = document.getElementById("hint");
+      if (err) {
+        status.className = "err";
+        status.textContent = "Tesla returned an error: " + err + (desc ? " — " + desc : "");
+        return;
+      }
+      if (!code) {
+        status.className = "err";
+        status.textContent = "No code parameter found. Start the authorize URL again.";
+        return;
+      }
+      status.className = "ok";
+      status.textContent = "Authorization code received. Copy it below:";
+      box.hidden = false;
+      box.textContent = code;
+      btn.hidden = false;
+      hint.hidden = false;
+      btn.addEventListener("click", function () {
+        navigator.clipboard.writeText(code).then(function () {
+          btn.textContent = "Copied";
+        }).catch(function () {
+          btn.textContent = "Select and copy manually";
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
